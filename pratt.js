@@ -7,7 +7,7 @@ var symbols = {};
  var binding_powers = {};
  var tokens = ['4','+','11','/','(','13','-','2',')'];
  var pointer = -1;
- var splitters = ['print','>=','<=','==','++','--','!=','+=','-=','*=','/=','<>','>','"','<','-','+','/','*','(',')','[',']',',','if','then','else','for','pow','ceil','floor','sqr','sqrt','function','{','}',';','=','.eq.'];
+ var splitters = ['print','>=','<=','==','++','--','!=','+=','-=','*=','/=','<>','>','"','<','-','+','/','*','(',')','[',']',',','if','then','else','for','pow','ceil','floor','sqr','sqrt','function','{','}',';','=','return'];
  var symbol_proto = {
  	nud:function(){
 
@@ -101,14 +101,10 @@ var symbols = {};
  }; 
 
  p.next = function(a,b){
-   //console.log(a);
    ++pointer;
    if (pointer >= tokens.length){
-     //pointer = tokens.length - 1;
      return;
    }
-
-   //console.log(tokens[pointer]);
    
    if (!symbols[tokens[pointer].trimLeft()]){
      //console.log(tokens[pointer]);
@@ -116,24 +112,12 @@ var symbols = {};
      	bp:0,
      	id:tokens[pointer].trimLeft()
      });
-   }else{
-    //console.log(tokens[pointer]);
    }
 
    token = symbols[tokens[pointer].trimLeft()];
-   if (token.value == 'sum'){
-     //console.log(token.nud(),token);
-   }
    
-
-   // console.log(pointer,tokens[pointer]);
-
-   //console.log(a);
-   if (a == 1){
-     //console.log(pointer,tokens[pointer],token,b);
-   }
-   //console.log(token.value);
  };
+
 
  p.prev = function(){
   --pointer;
@@ -220,6 +204,20 @@ var symbols = {};
  	}
  });
 
+
+ p.symbol({
+ 	id:'return',
+ 	bp:0,
+ 	nud:function(){
+ 		var rr = {};
+        rr.node = 'return';
+        rr.right = p.expr(0);
+        if (token.value == ';'){
+          p.next();
+        }
+ 		return rr;
+ 	}
+ });
 
  p.symbol({
  	id:"*",
@@ -620,6 +618,7 @@ var symbols = {};
     p.next();
 
     r.buff = b;
+    //p.next();
 
     return r;
 
@@ -1002,6 +1001,18 @@ var interpreter = {};
 
      return itr.eval_(body);
 
+  };
+
+  itr['return'] = function(ast){
+    return itr.eval_(ast.right);
+  };
+
+  itr['(string)'] = function(ast){
+  	var r = [];
+  	for (var i in ast.buff){
+      r.push(ast.buff[i]);
+  	}
+    return r.join('');
   };
 
 
